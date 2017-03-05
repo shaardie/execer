@@ -6,3 +6,6 @@ go:
 notifications:
   email:
   - sven@@haardiek.de
+before_install:
+  - sudo apt-get -qq update
+  - sudo apt-get install -y python3
