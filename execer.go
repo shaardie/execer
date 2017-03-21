@@ -56,48 +56,38 @@ func (e Execer) Status() Status {
 		e.stderr}
 }
 
+func readTo(scanner *bufio.Scanner, result *string, mutex *sync.Mutex) {
+	for scanner.Scan() {
+		mutex.Lock()
+		*result = *result + scanner.Text() + "\n"
+		mutex.Unlock()
+	}
+}
+
 func (e *Execer) runCmd() {
 	runner := exec.Command(e.cmd[0], e.cmd[1:]...)
 	defer func() { e.finished = true }()
-	reader, err := runner.StdoutPipe()
-	if err != nil {
+
+	if reader, err := runner.StdoutPipe(); err == nil {
+		go readTo(bufio.NewScanner(reader), &e.stdout, e.mutex)
+	} else {
 		e.err = err
 		return
 	}
 
-	scanner := bufio.NewScanner(reader)
-	go func() {
-		for scanner.Scan() {
-			e.mutex.Lock()
-			e.stdout = e.stdout + scanner.Text() + "\n"
-			e.mutex.Unlock()
-		}
-	}()
-
-	reader, err = runner.StderrPipe()
-	if err != nil {
+	if reader, err := runner.StderrPipe(); err == nil {
+		go readTo(bufio.NewScanner(reader), &e.stderr, e.mutex)
+	} else {
 		e.err = err
 		return
 	}
 
-	scanner2 := bufio.NewScanner(reader)
-	go func() {
-		for scanner2.Scan() {
-			e.mutex.Lock()
-			e.stderr = e.stderr + scanner2.Text() + "\n"
-			e.mutex.Unlock()
-		}
-	}()
-
-	err = runner.Start()
-	if err != nil {
+	if err := runner.Start(); err != nil {
 		e.err = err
 		return
 	}
 
-	err = runner.Wait()
-	if err != nil {
+	if err := runner.Wait(); err != nil {
 		e.err = err
 	}
-
 }
