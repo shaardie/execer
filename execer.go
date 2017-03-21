@@ -58,6 +58,7 @@ func (e Execer) Status() Status {
 
 func (e *Execer) runCmd() {
 	runner := exec.Command(e.cmd[0], e.cmd[1:]...)
+	defer func() { e.finished = true }()
 	reader, err := runner.StdoutPipe()
 	if err != nil {
 		e.err = err
@@ -99,5 +100,4 @@ func (e *Execer) runCmd() {
 		e.err = err
 	}
 
-	e.finished = true
 }
