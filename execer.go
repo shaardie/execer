@@ -3,6 +3,7 @@ package execer
 import (
 	"bufio"
 	"errors"
+	"io"
 	"os/exec"
 	"sync"
 )
@@ -56,7 +57,8 @@ func (e Execer) Status() Status {
 		e.stderr}
 }
 
-func readTo(scanner *bufio.Scanner, result *string, mutex *sync.Mutex) {
+func readTo(reader io.Reader, result *string, mutex *sync.Mutex) {
+	scanner := bufio.NewScanner(reader)
 	for scanner.Scan() {
 		mutex.Lock()
 		*result = *result + scanner.Text() + "\n"
@@ -69,14 +71,14 @@ func (e *Execer) runCmd() {
 	defer func() { e.finished = true }()
 
 	if reader, err := runner.StdoutPipe(); err == nil {
-		go readTo(bufio.NewScanner(reader), &e.stdout, e.mutex)
+		go readTo(reader, &e.stdout, e.mutex)
 	} else {
 		e.err = err
 		return
 	}
 
 	if reader, err := runner.StderrPipe(); err == nil {
-		go readTo(bufio.NewScanner(reader), &e.stderr, e.mutex)
+		go readTo(reader, &e.stderr, e.mutex)
 	} else {
 		e.err = err
 		return
