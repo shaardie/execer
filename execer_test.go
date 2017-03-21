@@ -2,6 +2,8 @@ package execer
 
 import (
 	"errors"
+	"strings"
+	"sync"
 	"testing"
 )
 
@@ -61,6 +63,22 @@ func TestStatus(t *testing.T) {
 	e.err = err
 	if e.Status().Error != err {
 		t.Error("Wrong Error")
+	}
+}
+
+func TestReadTo(t *testing.T) {
+	text := "This is\nen test\nfür dich!"
+	text2 := text + "\n"
+	var s string
+	readTo(strings.NewReader(text), &s, &sync.Mutex{})
+	if s != text2 {
+		t.Errorf("Wrong text. Got '%v', but should be '%v'", s, text2)
+	}
+	// reset string
+	s = ""
+	readTo(strings.NewReader(text2), &s, &sync.Mutex{})
+	if s != text2 {
+		t.Errorf("Wrong text. Got '%v', but should be '%v'", s, text2)
 	}
 }
 
