@@ -2,5 +2,8 @@ package execer
 
 func ExampleNewExecer() {
 	cmd := []string{"echo", "Hello World!"}
-	execer := Init(cmd)
+	_, err := Init(cmd)
+	if err != nil {
+		// Something went wrong during creation
+	}
 }
