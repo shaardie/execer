@@ -8,6 +8,7 @@ import (
 	"sync"
 )
 
+// Execer represent the Command to run.
 type Execer struct {
 	cmd      []string
 	err      error
@@ -18,6 +19,13 @@ type Execer struct {
 	stderr   string
 }
 
+// Status represent the (temporarily) status of a `Execer`.
+//
+// `Error` stores the (last) error.
+// `Finished` indicates if the command still running.
+// `Started` indicates if the command is already started.
+// `Stdout` contains the commands stdout until the time the `Status` was created.
+// `Stderr` contains the commands stderr until the time the `Status` was created.
 type Status struct {
 	Error    error
 	Finished bool
@@ -26,6 +34,7 @@ type Status struct {
 	Stderr   string
 }
 
+// Create a new `Execer`. `len(cmd) == 0` is not allowed.
 func Init(cmd []string) (Execer, error) {
 	e := Execer{}
 	if len(cmd) == 0 {
@@ -36,6 +45,8 @@ func Init(cmd []string) (Execer, error) {
 	return e, nil
 }
 
+// Start the command.
+// Returns an error if the command is not successfully started.
 func (e *Execer) Start() (err error) {
 	e.mutex.Lock()
 	if e.started {
@@ -48,6 +59,7 @@ func (e *Execer) Start() (err error) {
 	return
 }
 
+// Get the current status of the command run by `Execer`.
 func (e Execer) Status() Status {
 	return Status{
 		e.err,
