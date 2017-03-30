@@ -1,5 +1,4 @@
 [![Build Status](https://travis-ci.org/shaardie/execer.svg?branch=master)](https://travis-ci.org/shaardie/execer)
-[![Coverage Status](https://coveralls.io/repos/github/shaardie/execer/badge.svg)](https://coveralls.io/github/shaardie/execer)
 [![GoDoc](https://godoc.org/github.com/shaardie/execer?status.svg)](http://godoc.org/github.com/shaardie/execer)
 
 # Description
